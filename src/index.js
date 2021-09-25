@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import {
-    LogBox,
+    YellowBox,
     Animated,
     FlatList,
     View,
@@ -10,7 +10,7 @@ import {
 } from 'react-native'
 
 // Measure function triggers false positives
-LogBox.ignoreLogs(['Warning: isMounted(...) is deprecated', 'Animated: `useNativeDriver` was not specified. This is a required option and must be explicitly set to `true` or `false`']);
+YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
 
 const initialState = {
@@ -245,6 +245,7 @@ class DraggableFlatList extends Component {
                     this._spacerIndex = this._previousIndex;
                     this._previousIndex = this._spacerIndex - 1;
                     this._nextIndex = this._previousIndex + 1;
+                    this._spacerIndex = this._previousIndex; // add by elica
 
                     let found = false;
                     for (let i = this._previousIndex; i >= 0; i--) {
@@ -257,6 +258,7 @@ class DraggableFlatList extends Component {
                     this._noNext = false;
                     this._noPrevious = !found;
                     this.forceUpdate();
+                    this._spacerIndex = this._spacerIndex + 1;  // add by elica
                     return;
                 }
             }
@@ -278,6 +280,7 @@ class DraggableFlatList extends Component {
 
                     this._order[this._spacerIndex] = nextIndex;
                     this._order[this._nextIndex] = spacerIndex;
+                    
                     this._spacerIndex = this._nextIndex;
                     this._nextIndex = this._spacerIndex + 1;
                     this._previousIndex = this._nextIndex - 1;
@@ -300,10 +303,12 @@ class DraggableFlatList extends Component {
     };
 
     onReleaseAnimationEnd = () => {
+        
         const { data, onMoveEnd } = this.props;
         const tappedRowSave = this._tappedRow;
         const from = this._tappedRow;
         const to = this._spacerIndex;
+        console.log(from, to)
         const sortedData = this.arrayMove([...data], from, to);
         this._size = this.arrayMove(this._size, from, to);
         for (let i = 0; i < data.length; i++) {
